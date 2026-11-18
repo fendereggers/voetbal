@@ -1,0 +1,200 @@
+
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ULTIMATE CHAMPION</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;background:#080d19;color:white;
+ font-family:Arial;text-align:center;
+}
+header{padding:20px;background:#101a30}
+h1{color:#65e4ff;font-size:34px;margin:5px}
+button{
+ padding:13px 22px;border:0;border-radius:9px;
+ background:#48c9ed;color:#07121d;font-weight:bold;
+ cursor:pointer;font-size:16px;margin:5px;
+}
+button:hover{transform:scale(1.05)}
+#game{
+ max-width:850px;margin:20px auto;padding:20px;
+ background:#142039;border-radius:18px;
+}
+#field{
+ position:relative;overflow:hidden;
+ height:390px;border:4px solid #e4e9f2;
+ border-radius:12px;
+ background:repeating-linear-gradient(
+  90deg,#16864c 0px,#16864c 80px,#137944 80px,#137944 160px
+ );
+}
+.line{
+ position:absolute;left:0;right:0;top:50%;
+ border-top:2px solid #ffffff88;
+}
+.circle{
+ position:absolute;width:100px;height:100px;
+ border:2px solid white;border-radius:50%;
+ top:calc(50% - 50px);left:calc(50% - 50px);
+}
+.goal{
+ position:absolute;top:30%;height:40%;width:35px;
+ border:4px solid white;
+}
+#target{right:0;border-right:0}
+#player{
+ position:absolute;bottom:25px;left:50%;
+ transform:translateX(-50%);
+ font-size:42px;transition:left .12s;
+}
+#ball{
+ position:absolute;bottom:80px;left:50%;
+ transform:translateX(-50%);
+ font-size:30px;transition:all .35s;
+}
+#keeper{
+ position:absolute;right:15px;top:45%;
+ font-size:40px;
+}
+#hud{
+ display:flex;justify-content:space-around;
+ flex-wrap:wrap;margin:15px;
+}
+.stat{background:#202e49;padding:12px 20px;border-radius:10px}
+#message{font-size:20px;color:#74e6ff;min-height:28px}
+.controls{margin:15px}
+#menu{padding:20px}
+#gameArea{display:none}
+</style>
+</head>
+<body>
+<header>
+<h1>🏆 ULTIMATE CHAMPION</h1>
+<p>Become the legend.</p>
+</header>
+
+<div id="game">
+<div id="menu">
+<h2>Welkom, kampioen!</h2>
+<p>Ben jij goed genoeg om de ultieme kampioen te worden?</p>
+<h3>Kies je moeilijkheid</h3>
+<button onclick="start('easy')">Amateur</button>
+<button onclick="start('normal')">Pro</button>
+<button onclick="start('hard')">LEGEND</button>
+</div>
+
+<div id="gameArea">
+<div id="hud">
+<div class="stat">⚽ Goals: <span id="score">0</span></div>
+<div class="stat">🎯 Pogingen: <span id="shots">0</span>/10</div>
+<div class="stat">⭐ Level: <span id="level">1</span></div>
+</div>
+
+<div id="field">
+<div class="line"></div>
+<div class="circle"></div>
+<div class="goal" id="target"></div>
+<div id="keeper">🧤</div>
+<div id="player">🧍</div>
+<div id="ball">⚽</div>
+</div>
+
+<p id="message">Kies waar je wilt schieten!</p>
+
+<div class="controls">
+<button onclick="move(-1)">⬅️ Links</button>
+<button onclick="move(1)">Rechts ➡️</button>
+<br>
+<button onclick="shoot()">🚀 SCHIET!</button>
+</div>
+</div>
+</div>
+
+<script>
+let score=0,shots=0,level=1;
+let position=50;
+let difficulty='normal';
+let busy=false;
+
+function start(mode){
+ difficulty=mode;
+ score=0;shots=0;level=1;position=50;
+ document.getElementById('menu').style.display='none';
+ document.getElementById('gameArea').style.display='block';
+ update();
+}
+
+function move(dir){
+ if(busy)return;
+ position=Math.max(8,Math.min(85,position+dir*8));
+ document.getElementById('player').style.left=position+'%';
+ document.getElementById('ball').style.left=position+'%';
+ document.getElementById('message').innerText='Mooie beweging! Schiet maar!';
+}
+
+function shoot(){
+ if(busy)return;
+ if(shots>=10)return;
+
+ busy=true;
+ shots++;
+
+ let keeper=document.getElementById('keeper');
+ let ball=document.getElementById('ball');
+ let message=document.getElementById('message');
+
+ let random=Math.random();
+ let chance=difficulty==='easy'?.75:
+            difficulty==='normal'?.55:.35;
+
+ let goal=random<chance;
+
+ let direction=Math.floor(Math.random()*3);
+ let places=['30%','50%','70%'];
+
+ keeper.style.top=places[direction];
+ ball.style.left='90%';
+ ball.style.bottom='75%';
+
+ setTimeout(()=>{
+  if(goal){
+   score++;
+   message.innerText='🔥 GOOOOAL! Wat een schot!';
+  }else{
+   message.innerText='🧤 GESTOPT! Probeer opnieuw!';
+  }
+
+  if(shots%3===0)level++;
+  update();
+
+  setTimeout(()=>{
+   ball.style.left=position+'%';
+   ball.style.bottom='80px';
+   keeper.style.top='45%';
+   busy=false;
+
+   if(shots>=10)finish();
+  },900);
+ },400);
+}
+
+function update(){
+ document.getElementById('score').innerText=score;
+ document.getElementById('shots').innerText=shots;
+ document.getElementById('level').innerText=level;
+}
+
+function finish(){
+ document.getElementById('message').innerText=
+ '🏆 EINDRESULTAAT: '+score+' goals uit 10 pogingen!';
+ let btn=document.createElement('button');
+ btn.innerText='🔄 Opnieuw spelen';
+ btn.onclick=()=>location.reload();
+ document.querySelector('.controls').appendChild(btn);
+}
+</script>
+</body>
+</html>
